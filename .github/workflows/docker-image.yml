@@ -14,7 +14,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Build the Docker image
-      run: docker build ./tech-test --tag oluay87/lendable_tech_test:${{ github.sha }} .
+      run: docker build -t oluay87/lendable_tech_test:${{ github.sha }} .
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v1
