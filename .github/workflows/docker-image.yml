@@ -13,17 +13,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Build and push the Docker image
-        run: |
-          docker build -t oluay87/lendable_tech_test:${{ github.sha }} -t oluay87/lendable_tech_test:latest ./tech-test
-          docker push oluay87/lendable_tech_test:${{ github.sha }}
-          docker push oluay87/lendable_tech_test:latest
-
       - name: Log in to Docker Hub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push the Docker image
+        run: |
+          docker build -t oluay87/lendable_tech_test:${{ github.sha }} -t oluay87/lendable_tech_test:latest ./tech-test
+          docker push oluay87/lendable_tech_test:${{ github.sha }}
+          docker push oluay87/lendable_tech_test:latest
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
