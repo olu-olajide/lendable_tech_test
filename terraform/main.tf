@@ -11,14 +11,14 @@ resource "aws_instance" "app" {
   security_groups        = ["${aws_security_group.app_sg.name}"]
 
 user_data = <<-EOF
-              #!/bin/bash
-              sudo yum update -y
-              sudo amazon-linux-extras install docker -y
-              sudo service docker start
-              sudo usermod -a -G docker ec2-user
-              sudo docker pull oluay87/lendable_tech_test:latest
-              sudo docker run -d --restart unless-stopped -p 80:80 oluay87/lendable_tech_test:latest
-              EOF
+  #!/bin/bash
+  sudo yum install docker -y
+  sudo systemctl start docker
+  sudo systemctl enable docker
+  sudo usermod -aG docker ec2-user
+  sudo docker pull oluay87/lendable_tech_test:latest
+  sudo docker run -d --restart unless-stopped -p 80:80 oluay87/lendable_tech_test:latest
+EOF
 
   tags = {
     Name = "AppServer ${count.index + 1}"
