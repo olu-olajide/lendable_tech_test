@@ -1,0 +1,25 @@
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files can contain sensitive information and should not be committed to version control
+*.tfstate
+*.tfstate.backup
+
+# Ignore override files
+*.override.tf
+*.override.tf.json
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# Ignore any .tfvars files that might contain sensitive data
+*.tfvars
+
+# Ignore the SSH Key for now, you may wish to manage this outside of Git.
+deployer-key.pem
+
+# Ignore Terraform plan output
+*.tfplan
+*.tfplan.json
+
