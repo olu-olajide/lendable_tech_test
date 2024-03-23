@@ -22,4 +22,5 @@ deployer-key.pem
 # Ignore Terraform plan output
 *.tfplan
 *.tfplan.json
+terraform*.lock.hcl
 

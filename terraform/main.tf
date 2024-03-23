@@ -4,7 +4,7 @@ provider "aws" {
 
 resource "aws_instance" "app" {
   count         = var.instance_count
-  ami           = "ami-0c101f26f147fa7fd" # Use the correct AMI for your region
+  ami           = "ami-0c101f26f147fa7fd" 
   instance_type = "t2.micro"
 
   key_name               = aws_key_pair.deployer.key_name
@@ -37,6 +37,13 @@ resource "aws_security_group" "app_sg" {
   ingress {
     from_port   = 80
     to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+    ingress {
+    from_port   = 22
+    to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
