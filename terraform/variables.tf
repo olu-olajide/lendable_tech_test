@@ -1,7 +1,7 @@
 variable "instance_count" {
   description = "The number of instances to deploy."
   type        = number
-  default     = 3
+  default     = 1
 }
 
 variable "public_key_path" {
