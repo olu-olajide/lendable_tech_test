@@ -6,10 +6,11 @@
 - [Scenario](#scenario)
 - [Problem Statement](#problem-statement)
 - [Solution](#solution)
-    - [Step 1: Verify Nginx Configuration](#step-1-verify-nginx-configuration)
-    - [Step 2: Examine and Update the Dockerfile](#step-2-examine-and-update-the-dockerfile)
-    - [Step 3: Building and Running the Docker Container](#step-3-building-and-running-the-docker-container)
-    - [Step 4: Automate Deployment with Terraform](#step-4-automate-deployment-with-terraform)
+  - [Step 1: Verify Nginx Configuration](#step-1-verify-nginx-configuration)
+  - [Step 2: Examine and Update the Dockerfile](#step-2-examine-and-update-the-dockerfile)
+  - [Step 3: Building and Running the Docker Container](#step-3-building-and-running-the-docker-container)
+  - [Step 4: Automate Deployment with Terraform](#step-4-automate-deployment-with-terraform)
+- [CI/CD Pipeline Integration](#cicd-pipeline-integration)
 - [Documentation and Commentary](#documentation-and-commentary)
 - [Findings and Recommendations](#findings-and-recommendations)
 - [Future Work](#future-work)
@@ -46,9 +47,20 @@ Built the Docker image and ran it without volume mounting to simplify debugging,
 
 Developed Terraform scripts to provision EC2 instances and manage the deployment process across multiple servers.
 
+## CI/CD Pipeline Integration
+
+Our project leverages GitHub Actions for continuous integration and deployment, automating the build and push of our Docker image to Docker Hub, and configuring AWS credentials for deployment. The process ensures every change to the main branch triggers the pipeline, keeping our deployment updated.
+
+### Steps in the CI/CD Pipeline:
+
+- **Checkout**: Clones the repository to the runner.
+- **Docker Hub Login**: Logs into Docker Hub using secrets stored in GitHub.
+- **Build and Push Docker Image**: Builds the Docker image and pushes it to Docker Hub, tagged with the commit SHA and as 'latest'.
+- **Configure AWS Credentials**: Configures AWS credentials for deploying the Docker image to the AWS infrastructure.
+
 ## Documentation and Commentary
 
-Detailed documentation and rationale behind each decision were maintained throughout the project, emphasizing the importance of process understanding alongside results.
+Throughout the project, we maintained detailed documentation and rationale for each decision, highlighting the importance of understanding the process as well as the outcomes.
 
 ## Findings and Recommendations
 
@@ -70,13 +82,9 @@ Detailed documentation and rationale behind each decision were maintained throug
 
 ## Future Work
 
-### CI/CD Pipeline Integration
-
-- Aim to integrate CI/CD pipelines for automated deployments and explore blue-green deployment strategies.
-
 ### Monitoring and Logging
 
-- Plan to set up CloudWatch for monitoring and establish centralized logging for improved diagnostics.
+- Planning to set up CloudWatch for monitoring and establish centralized logging for improved diagnostics.
 
 ## Quick Start
 
