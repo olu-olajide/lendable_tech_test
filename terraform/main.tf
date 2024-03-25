@@ -1,22 +1,21 @@
-# The AWS provider configuration specifies the AWS region where the resources will be deployed. 
-# Choosing a region is crucial as it affects latency for your users and can also impact costs.
+# Configure the AWS provider with the specified region where the resources will be deployed.
+# This sets the foundation for all AWS resource deployments in the Terraform script.
 provider "aws" {
   region = "us-east-1"
 }
 
-# This resource block defines the EC2 instances that will host our Dockerized Nginx web server.
-# 'count' allows us to create multiple instances based on the 'instance_count' variable, 
-# enabling easy scaling of our deployment.
+# Define an AWS EC2 instance resource. This block is responsible for creating
+# EC2 instances according to the specified configurations like AMI, instance type, and count.
 resource "aws_instance" "app" {
-  count         = var.instance_count
-  ami           = "ami-0c101f26f147fa7fd"  # Specifies the Amazon Machine Image (AMI) to use for the instances, which should have the necessary dependencies pre-installed.
-  instance_type = "t2.micro"  # Defines the type of instance, balancing cost and compute capacity for our use case.
+  count         = var.instance_count  # Determines how many instances to create based on the variable value.
+  ami           = "ami-0c101f26f147fa7fd"  # Specifies which AMI to use for the instance, influencing OS and pre-installed packages.
+  instance_type = "t2.micro"  # The type of instance to deploy, balancing cost and performance for the application needs.
 
   key_name      = aws_key_pair.deployer.key_name  # Associates an SSH key for secure access to the instances.
-  security_groups = ["${aws_security_group.app_sg.name}"]  # Attaches a security group to define allowable inbound and outbound traffic.
+  security_groups = [aws_security_group.app_sg.name]  # Attaches a security group to define network access rules for the instance.
 
-  # User data script to automate the setup process on instance launch, such as installing Docker, 
-  # pulling the latest version of our Dockerized application, and running it.
+  # User data script to automate initial setup tasks on the instance like installing Docker,
+  # pulling the latest Docker image, and running a Docker container from that image.
   user_data = <<-EOF
   #!/bin/bash
   sudo yum install docker -y
@@ -27,27 +26,27 @@ resource "aws_instance" "app" {
   sudo docker run -d --restart unless-stopped -p 80:80 oluay87/lendable_tech_test:latest
 EOF
 
-  # Tags the instances for easier identification, especially useful when filtering resources within the AWS console.
+  # Tags the instance for easier identification and management within the AWS ecosystem.
   tags = {
     Name = "AppServer ${count.index + 1}"
   }
 }
 
-# This resource block creates an SSH key pair, enabling secure SSH access to the instances.
-# The public key is specified through the 'public_key_path' variable.
+# Creates an SSH key pair resource for instance access. The public key is provided
+# via a variable, allowing SSH access to the EC2 instances.
 resource "aws_key_pair" "deployer" {
   key_name   = "deployer-key"
-  public_key = file("${var.public_key_path}")
+  public_key = file(var.public_key_path)  # Reads the public key from the specified file path.
 }
 
-# Defines a security group that controls the inbound and outbound traffic for our instances.
-# Here, we allow inbound HTTP traffic on port 80 and SSH access on port 22, 
-# and permit all outbound traffic, ensuring our web server is accessible from the internet
-# and that the instances can reach external services if needed.
+# Defines a security group to control network access to and from the EC2 instances.
+# This is crucial for defining what traffic can reach the application and ensuring its security.
 resource "aws_security_group" "app_sg" {
   name        = "app_sg"
-  description = "Allow web traffic and SSH access"
+  description = "Allow web traffic"
 
+  # Ingress rule to allow HTTP traffic on port 80 from any source.
+  # Essential for making the web server accessible from the internet.
   ingress {
     from_port   = 80
     to_port     = 80
@@ -55,6 +54,8 @@ resource "aws_security_group" "app_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # Ingress rule to allow SSH access on port 22 from any source.
+  # This provides the capability to securely manage the instances.
   ingress {
     from_port   = 22
     to_port     = 22
@@ -62,6 +63,8 @@ resource "aws_security_group" "app_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # Egress rule to allow all outbound traffic from the instances.
+  # This ensures the instances can reach the internet, for example, to pull Docker images.
   egress {
     from_port   = 0
     to_port     = 0
@@ -70,29 +73,3 @@ resource "aws_security_group" "app_sg" {
   }
 }
 
-# The 'instance_count' variable determines how many EC2 instances to deploy.
-# This approach allows for easy adjustments based on load or budget considerations.
-variable "instance_count" {
-  description = "The number of instances to deploy."
-  type        = number
-  default     = 1
-}
-
-# The 'public_key_path' variable specifies the path to the SSH public key used for the 'aws_key_pair' resource.
-variable "public_key_path" {
-  description = "Path to the public key to be used for SSH access"
-  default     = "~/.ssh/id_rsa.pub"
-}
-
-# The 'docker_image_tag' variable allows for specifying different versions of the Docker image to be deployed.
-variable "docker_image_tag" {
-  description = "Tag of the Docker image to deploy"
-  default     = "latest"
-}
-
-# Outputs the public IP addresses of the deployed instances, 
-# providing easy access to the IP addresses needed to connect to or access the web server.
-output "instance_ips" {
-  description = "Public IP addresses of the instances"
-  value       = aws_instance.app.*.public_ip
-}
