@@ -1,33 +1,51 @@
+# The name of our GitHub Actions workflow, indicating its primary purpose.
 name: Docker Image CI
 
+# Defines the events that trigger the workflow. This approach ensures that
+# our CI/CD pipeline is responsive to code changes and pull requests,
+# embodying the practice of Continuous Integration and Continuous Deployment.
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main" ]  # Executes the workflow on pushes to the 'main' branch, safeguarding our production code's integrity.
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main" ]  # Activates on pull requests targeting 'main', facilitating code review and integration testing.
 
 jobs:
+  # This job encompasses the steps to build and push our Docker image,
+  # and configure AWS credentials for further deployment actions.
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Chooses the latest Ubuntu runner. Using the latest version ensures access to recent updates and security patches, promoting a secure and stable build environment.
 
     steps:
+      # First, we must check out our repository's code. This action makes the repository available to the workflow,
+      # allowing us to build our Docker image based on the current state of our code.
       - uses: actions/checkout@v3
 
+      # Docker Hub authentication is crucial for pushing our images. By securely storing our credentials in GitHub Secrets,
+      # we minimize risk exposure while maintaining the automation of our pipeline.
       - name: Log in to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKER_USERNAME }}  # Utilizes the Docker Hub username stored in GitHub Secrets.
+          password: ${{ secrets.DOCKER_PASSWORD }}  # Uses the Docker Hub password or token from GitHub Secrets, ensuring our actions are authenticated without hardcoding sensitive information.
 
+      # Building and pushing the Docker image involves several deliberate choices:
+      # We tag our image with both the commit SHA and 'latest' to maintain an easily accessible latest version
+      # while preserving the immutability and traceability of individual builds. This dual-tagging strategy
+      # supports rollback scenarios and aids in identifying specific builds.
       - name: Build and push the Docker image
         run: |
           docker build -t oluay87/lendable_tech_test:${{ github.sha }} -t oluay87/lendable_tech_test:latest ./tech-test
           docker push oluay87/lendable_tech_test:${{ github.sha }}
           docker push oluay87/lendable_tech_test:latest
 
+      # The configuration of AWS credentials is a preparatory step for any deployment activities within AWS.
+      # By leveraging GitHub Secrets for credential storage, we maintain security best practices.
+      # This setup facilitates future steps that might deploy our Docker container to an AWS service,
+      # such as Amazon ECS or EKS, enabling a seamless CI/CD pipeline that extends from code commit to deployment in the cloud.
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: us-east-1  # Explicitly defines the AWS region, ensuring that our actions target the correct geographic area for our infrastructure.
