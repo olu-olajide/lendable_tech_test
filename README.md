@@ -45,7 +45,7 @@ Built the Docker image and ran it without volume mounting to simplify debugging,
 
 ### Step 4: Automate Deployment with Terraform
 
-Developed Terraform scripts to provision EC2 instances and manage the deployment process across multiple servers.
+Developed Terraform scripts to provision EC2 instances and manage the deployment process across multiple servers. This step involves defining the AWS provider, specifying instance details, security group settings for web traffic, and incorporating user data for automated Docker setup and application deployment.
 
 ## CI/CD Pipeline Integration
 
